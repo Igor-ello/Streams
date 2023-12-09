@@ -1,16 +1,14 @@
 public class Main {
     private static int MAX_VALUE = 20;
+    static final Object lock = new Object();
 
     public static void main(String[] args) {
         Thread evenThread = new Thread(new Runnable() { //чётные
             @Override
             public void run() {
                 for (int i = 2; i < MAX_VALUE; i++){
-                    System.out.println("Первый поток " + i);
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                    synchronized (lock) { // не заходим в это поле, плка выполняется другой поток
+                        System.out.println("Первый поток " + i);
                     }
                 }
             }
@@ -19,11 +17,8 @@ public class Main {
             @Override
             public void run() {
                 for (int i = 1; i < MAX_VALUE; i++){
-                    System.out.println("Второй поток " + i);
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                    synchronized (lock) {
+                        System.out.println("Второй поток " + i);
                     }
                 }
             }
