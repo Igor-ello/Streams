@@ -43,6 +43,7 @@ public class Main {
             }
         });
 
+
         evenThread.start(); //через run() поток в главном потоке
         oddThread.start();
     }
