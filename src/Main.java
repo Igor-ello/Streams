@@ -1,50 +1,37 @@
 public class Main {
-    private static int MAX_VALUE = 20;
-    static final Object lock = new Object();
-    static Boolean isEvenTrue = true;
+    private volatile Boolean flag = false; //поток получает актуальное значение, а не сохраняет в кэш
+
+    Runnable gui = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("Stop gui");
+            flag = true;
+        }
+    };
+    Runnable logic = new Runnable() {
+        @Override
+        public void run() {
+            while (!flag){
+
+            }
+            System.out.println("Stop logic");
+        }
+    };
+
+     void  doStart(){
+        new Thread(gui).start();
+        System.out.println("Start gui");
+        new Thread(logic).start();
+        System.out.println("Start logic");
+    }
 
     public static void main(String[] args) {
-        Thread evenThread = new Thread(new Runnable() { //чётные
-            @Override
-            public void run() {
-                for (int i = 2; i < MAX_VALUE; i++){
-                    synchronized (lock) { // не заходим в это поле, плка выполняется другой поток
-                        while (!isEvenTrue) {
-                            try {
-                                lock.wait();
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        System.out.println("Первый поток " + i);
-                        isEvenTrue = false;
-                        lock.notify();
-                    }
-                }
-            }
-        });
-        Thread oddThread = new Thread(new Runnable() { //не чётные
-            @Override
-            public void run() {
-                for (int i = 1; i < MAX_VALUE; i++){
-                    synchronized (lock) {
-                        while (isEvenTrue) {
-                            try {
-                                lock.wait();
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        System.out.println("Второй поток " + i);
-                        isEvenTrue = true;
-                        lock.notify();
-                    }
-                }
-            }
-        });
-
-
-        evenThread.start(); //через run() поток в главном потоке
-        oddThread.start();
+        new Main().doStart();
     }
+
 }
